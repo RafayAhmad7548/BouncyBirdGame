@@ -7,6 +7,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/painting.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum GameState{running, gameover}
 
@@ -14,8 +15,13 @@ class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
 
 	late Bird bird;
   late List<BouncePad> bouncePads;
-  GameState gameState = GameState.running;
   late TextComponent _gameOverText;
+  late TextComponent _scoreText;
+  GameState gameState = GameState.running;
+  int score = 0;
+  int highscore = 0;
+
+  late final SharedPreferencesWithCache prefs;
 
 	@override
 	FutureOr<void> onLoad() async{
@@ -41,31 +47,55 @@ class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
         )
       )
     );
+    _scoreText = TextComponent(
+      text: "Score: $score HiScore: $highscore",
+      position: Vector2(10, 10),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 28,
+        )
+      )
+    );
+
+    prefs = await SharedPreferencesWithCache.create(cacheOptions: const SharedPreferencesWithCacheOptions());
+    highscore = prefs.getInt('hiscore') ?? 0;
     
     addAll(bouncePads);
 		add(bird);
+    add(_scoreText);
 
 	}
 
 	@override
-	void update(double dt){
+	void update(double dt) async{
 		super.update(dt);
 
     if(gameState == GameState.running){
+      // remove gameover text if there is
       if(_gameOverText.isMounted){
         remove(_gameOverText);
       }
+
+      // increment score
+      if(bird.velocity.y < 0){
+        score++;
+        _scoreText.text = "Score: $score HiScore: $highscore";
+      }
+
+      // move pads down i.e. bird moving up
       if(!(bird.position.y > size.y/2 || bird.velocity.y > 0)){
         for(BouncePad bp in bouncePads){
           bp.position.y += -bird.velocity.y;
         }
       }
+      // move pads up i.e. bird moving down
       if(bird.position.y + bird.size.y >= size.y){
         for(BouncePad bp in bouncePads){
           bp.position.y += -bird.velocity.y;
         }
       }
 
+      // gameover check
       bool flag = true;
       for(BouncePad bp in bouncePads){
         if(bp.position.y > 0){
@@ -77,9 +107,17 @@ class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
       }
     }
     else{
+      // add gameover text if there isnt
       if(!_gameOverText.isMounted){
         add(_gameOverText);
       }
+      if(score > highscore){
+        highscore = score;
+        _scoreText.text = "Score: $score HiScore: $highscore";
+      }
+      prefs.setInt('hiscore', highscore);
+      score = 0;
+      
     }
 
 	}
