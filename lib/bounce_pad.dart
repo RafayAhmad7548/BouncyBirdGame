@@ -20,8 +20,8 @@ class BouncePad extends PositionComponent{
   @override
   void update(double dt){
     final screenSize = (parent as BouncyBird).size;
-    final random = Random();
     if(position.y > screenSize.y){
+      final random = Random();
       final x = random.nextDouble() * ((screenSize.x - 75));
       position.x = x;
       position.y = -10;

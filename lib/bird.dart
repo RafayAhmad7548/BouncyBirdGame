@@ -11,7 +11,7 @@ class Bird extends SpriteComponent with CollisionCallbacks{
   Vector2 acceleration;
   late Sprite spriteLeft;
   late Sprite spriteRight;
-  Bird({required super.size}) : velocity = Vector2(0, 5), acceleration = Vector2(0, 0.5);
+  Bird({required super.size}) : velocity = Vector2(0, 5), acceleration = Vector2(0, 0.25);
 
   @override
   FutureOr<void> onLoad() async{
@@ -32,42 +32,47 @@ class Bird extends SpriteComponent with CollisionCallbacks{
   @override
   void update(double dt){ 
     super.update(dt);
-    final screenSize = (parent as BouncyBird).size;
+    final par = (parent as BouncyBird);
+    final screenSize = par.size;
 
-    velocity.y = velocity.y.clamp(-20, 20);
+    if(par.gameState == GameState.running){
+      // accelarate and move
+      velocity.y = velocity.y.clamp(-20, 20);
+      if(position.y > screenSize.y/2 || velocity.y > 0){
+        position.y += velocity.y;
+      }
+      position.x += velocity.x;
+      velocity.add(acceleration);
 
-    if(position.y > screenSize.y/2 || velocity.y > 0){
-      position.add(velocity);
+      // wrap around the x axis
+      if(position.x + size.x < 0){
+        position.x = screenSize.x;
+      }
+      else if(position.x > screenSize.x){
+        position.x = -size.x;
+      }
+
+      // stop at bottom
+      if(position.y + size.y >= screenSize.y){
+        position.y = screenSize.y - size.y;
+      }
+
+      // make the bird look left and right
+      if(velocity.x < 0){
+        sprite = spriteLeft;
+      }
+      else{
+        sprite = spriteRight;
+      }
     }
 
-    velocity.add(acceleration);
-
-    if(position.x + size.x < 0){
-      position.x = screenSize.x;
-    }
-    else if(position.x > screenSize.x){
-      position.x = -size.x;
-    }
-    // if(position.y + size.y < 0){
-    //   position.y = screenSize.y;
-    // }
-    // else if(position.y > screenSize.y){
-    //   position.y = -size.y;
-    // }
-
-    if(velocity.x < 0){
-      sprite = spriteLeft;
-    }
-    else{
-      sprite = spriteRight;
-    }
   }
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other){
     super.onCollision(intersectionPoints, other);
-    if(velocity.y >= 0){
-      velocity.y = -20;
+    if(velocity.y > 0 && position.y+size.y > other.y){
+      velocity.y = -15;
     }
   }
 
