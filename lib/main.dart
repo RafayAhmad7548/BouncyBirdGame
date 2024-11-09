@@ -1,20 +1,9 @@
+import 'package:bouncybird/bouncy_bird.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+import 'package:wakelock_plus/wakelock_plus.dart';
+void main(){
+  WidgetsFlutterBinding.ensureInitialized();
+  WakelockPlus.enable();
+  runApp(GameWidget(game: BouncyBird()));
 }

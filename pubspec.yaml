@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.21.0
+  sensors_plus: ^6.1.0
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -18,3 +20,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/bird_left.png
+    - assets/images/bird_right.png
