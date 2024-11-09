@@ -6,12 +6,13 @@ import 'package:bouncybird/bounce_pad.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum GameState{running, gameover}
 
-class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
+class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector, KeyboardEvents{
 
 	late Bird bird;
   late List<BouncePad> bouncePads;
@@ -69,7 +70,6 @@ class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
 	@override
 	void update(double dt) async{
 		super.update(dt);
-
     if(gameState == GameState.running){
       // remove gameover text if there is
       if(_gameOverText.isMounted){
@@ -133,9 +133,17 @@ class BouncyBird extends FlameGame with HasCollisionDetection, TapDetector{
       for(BouncePad bp in bouncePads){
         bp.position.y = 150 + bouncePads.indexOf(bp) * ((size.y - 150) / 6);
       }
-      remove(_gameOverText);
+      if(_gameOverText.isMounted){
+        remove(_gameOverText);
+      }
     }
-  } 
+  }
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed){
+    bird.onKeyPress(event);
+    return super.onKeyEvent(event, keysPressed);
+  }
   
 
 
